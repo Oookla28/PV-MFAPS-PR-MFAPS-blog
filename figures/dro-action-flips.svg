@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 650" role="img">
+<style>text{font-family:"Songti SC","STSong","SimSun",serif}.title{fill:#2b2824;font-size:25px;font-weight:600}.axis{stroke:#70675d;stroke-width:1}.grid{stroke:#e5ddd1;stroke-width:1}.label{fill:#4b4540;font-size:15px}.small{fill:#766d63;font-size:13px}.legend{fill:#4b4540;font-size:14px}</style>
+<text class="title" x="70" y="43">DRO 约束下的两个边界动作</text>
+<text class="label" x="135" y="75">Class 38 · k=2 → 0</text>
+<line class="grid" x1="135" y1="520.0" x2="570" y2="520.0"/><text class="small" x="127" y="524.0" text-anchor="end">11.9</text>
+<line class="grid" x1="135" y1="436.0" x2="570" y2="436.0"/><text class="small" x="127" y="440.0" text-anchor="end">22.3</text>
+<line class="grid" x1="135" y1="352.0" x2="570" y2="352.0"/><text class="small" x="127" y="356.0" text-anchor="end">32.8</text>
+<line class="grid" x1="135" y1="268.0" x2="570" y2="268.0"/><text class="small" x="127" y="272.0" text-anchor="end">43.3</text>
+<line class="grid" x1="135" y1="184.0" x2="570" y2="184.0"/><text class="small" x="127" y="188.0" text-anchor="end">53.8</text>
+<line class="grid" x1="135" y1="100.0" x2="570" y2="100.0"/><text class="small" x="127" y="104.0" text-anchor="end">64.3</text>
+<line class="axis" x1="135.0" y1="520" x2="135.0" y2="526"/><text class="small" x="135.0" y="543" text-anchor="middle">0</text>
+<line class="axis" x1="243.8" y1="520" x2="243.8" y2="526"/><text class="small" x="243.8" y="543" text-anchor="middle">1</text>
+<line class="axis" x1="352.5" y1="520" x2="352.5" y2="526"/><text class="small" x="352.5" y="543" text-anchor="middle">2</text>
+<line class="axis" x1="570.0" y1="520" x2="570.0" y2="526"/><text class="small" x="570.0" y="543" text-anchor="middle">4</text>
+<line class="axis" x1="135" y1="100" x2="135" y2="520"/><line class="axis" x1="135" y1="520" x2="570" y2="520"/>
+<polyline fill="none" stroke="#b85c38" stroke-width="4" points="135.0,121.8 243.8,120.4 352.5,118.9 570.0,116.0"/>
+<text class="legend" x="510" y="122" fill="#b85c38">p0</text>
+<polyline fill="none" stroke="#356da8" stroke-width="4" points="135.0,501.3 243.8,502.0 352.5,502.6 570.0,504.0"/>
+<text class="legend" x="510" y="144" fill="#356da8">p1</text>
+<text class="small" x="135" y="560">p0 的风险随 k 上升，鲁棒策略放弃 k=2</text>
+<text class="label" x="705" y="75">Class 68 · k=0 → 1</text>
+<line class="grid" x1="705" y1="520.0" x2="1140" y2="520.0"/><text class="small" x="697" y="524.0" text-anchor="end">250.2</text>
+<line class="grid" x1="705" y1="436.0" x2="1140" y2="436.0"/><text class="small" x="697" y="440.0" text-anchor="end">293.1</text>
+<line class="grid" x1="705" y1="352.0" x2="1140" y2="352.0"/><text class="small" x="697" y="356.0" text-anchor="end">335.9</text>
+<line class="grid" x1="705" y1="268.0" x2="1140" y2="268.0"/><text class="small" x="697" y="272.0" text-anchor="end">378.8</text>
+<line class="grid" x1="705" y1="184.0" x2="1140" y2="184.0"/><text class="small" x="697" y="188.0" text-anchor="end">421.6</text>
+<line class="grid" x1="705" y1="100.0" x2="1140" y2="100.0"/><text class="small" x="697" y="104.0" text-anchor="end">464.5</text>
+<line class="axis" x1="705.0" y1="520" x2="705.0" y2="526"/><text class="small" x="705.0" y="543" text-anchor="middle">0</text>
+<line class="axis" x1="813.8" y1="520" x2="813.8" y2="526"/><text class="small" x="813.8" y="543" text-anchor="middle">1</text>
+<line class="axis" x1="922.5" y1="520" x2="922.5" y2="526"/><text class="small" x="922.5" y="543" text-anchor="middle">2</text>
+<line class="axis" x1="1140.0" y1="520" x2="1140.0" y2="526"/><text class="small" x="1140.0" y="543" text-anchor="middle">4</text>
+<line class="axis" x1="705" y1="100" x2="705" y2="520"/><line class="axis" x1="705" y1="520" x2="1140" y2="520"/>
+<polyline fill="none" stroke="#b85c38" stroke-width="4" points="705.0,105.5 813.8,105.7 922.5,105.4 1140.0,103.9"/>
+<text class="legend" x="1080" y="122" fill="#b85c38">p0</text>
+<polyline fill="none" stroke="#356da8" stroke-width="4" points="705.0,516.1 813.8,515.9 922.5,515.6 1140.0,514.6"/>
+<text class="legend" x="1080" y="144" fill="#356da8">p1</text>
+<text class="small" x="705" y="560">p0 在 k=1 达到较低风险，鲁棒策略选择 k=1</text>
+<text class="small" x="70" y="620">两个分区的逐类 FIT counts 完全配对，动作翻转由风险曲率决定，不能用频率差异解释。</text>
+</svg>
