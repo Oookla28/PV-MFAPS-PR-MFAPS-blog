@@ -1,42 +1,106 @@
-# 一开始比较的是几何，后来追问的是反馈
+# 反馈几何：从“能读出”到“能正确反馈”
 
-最初的问题很朴素。对同一批植物病害样本，比较 Raw、矩阵 Log 和其他 SPD 映射，看看哪一种几何让分类更好。固定编码器、重新拟合 affine readout 时，Raw 与 Log 都可以被读出来。把编码器解冻后，同一表示的训练轨迹却会分开。
+## 1. 最初的比较为什么不够
 
-> 表示里有信息，和当前的读出是否会把正确的信号传回编码器，是两个问题。
+PlantSPD 的最初问题是比较 Raw、矩阵 Log 以及其他 SPD 映射。固定编码器后，给定同一批 SPD 特征，重新拟合一个 affine readout，Raw 与 Log 都可以被读出。这说明两个表示之间的差异不能直接归结为“一个含有标签信息，另一个没有”。
 
-对样本 $x_i$，记 SPD 表示为 $C_\psi(x_i)$，几何映射为 $\phi$，读出特征为
+> 固定特征上的可读性，是一个前向问题。联合训练中的反馈方向，是另一个问题。
 
-$$z_\psi(x_i)=\operatorname{svec}(\phi(C_\psi(x_i))).$$
+对样本 (x_i)，令编码器输出的 SPD 矩阵为 (C_\psi(x_i))，谱映射为 (phi)，对称矩阵向量化算子为 (operatorname{svec})。读出特征为
 
-读出 $W$ 和编码器参数 $\psi$ 的联合目标写成
+$$
+z_\psi(x_i)=\operatorname{svec}\!\left(\phi(C_\psi(x_i))\right).
+$$
 
-$$L(\psi,W)=\frac1n\sum_i\ell(Wz_\psi(x_i),y_i)+\frac{\lambda}{2}\lVert W\rVert_F^2.$$
+读出矩阵为 (W)，联合目标为
 
-在相同表示上充分求解读出，得到 $W^*(\psi)$。训练中实际使用的头是 $W_t$。于是可以直接比较
+$$
+L(\psi,W)=\frac1n\sum_{i=1}^{n}\ell\!\left(Wz_\psi(x_i),y_i\right)+\frac{\lambda}{2}\lVert W\rVert_F^2.
+$$
 
-$$g_{\mathrm{actual}}=\nabla_\psi L(\psi,W_t),\qquad g_{\mathrm{ref}}=\nabla_\psi L(\psi,W^*(\psi)).$$
+在固定 (psi) 时，充分求解读出得到
 
-读出反馈失配定义为
+$$
+W^*(\psi)=\arg\min_W L(\psi,W).
+$$
 
-$$e_\psi=g_{\mathrm{actual}}-g_{\mathrm{ref}}.$$
+训练中真正使用的是有限步读出 (W_t)。于是可以把两个 encoder gradient 放在同一个 checkpoint 上比较：
 
-## Loewner 差商把前向和反向分开
+$$
+ g_{\mathrm{actual}}=\nabla_\psi L(\psi,W_t),\qquad
+ g_{\mathrm{ref}}=\nabla_\psi L\!\left(\psi,W^*(\psi)\right).
+$$
 
-令 $C=U\Lambda U^\top$ 是对称正定矩阵。谱函数 $\phi$ 的 Fréchet 导数满足
+反馈失配定义为
 
-$$D\phi_C[H]=U\big(G_\phi(\Lambda)\odot(U^\top H U)\big)U^\top,$$
+$$
+ e_\psi=g_{\mathrm{actual}}-g_{\mathrm{ref}}.
+$$
 
-其中
+这里的 (e_\psi) 不是读出 loss 的简单差值。它是读出误差经过表示 Jacobian 后的结果，因此同样的前向损失差异可能产生完全不同的 encoder update。
 
-$$\big(G_\phi(\Lambda)\big)_{ij}=\begin{cases}\dfrac{\phi(\lambda_i)-\phi(\lambda_j)}{\lambda_i-\lambda_j},&\lambda_i\ne\lambda_j,\\[6pt]\phi'(\lambda_i),&\lambda_i=\lambda_j.\end{cases}$$
+## 2. 一个前向等价、反向不等价的构造
 
-前向特征主要由 $\phi(\lambda_i)$ 决定，反向反馈则被差商 $G_\phi$ 调制。对矩阵 Log，$\phi'(\lambda)=1/\lambda$，小特征值会让导数方向变得敏感。稳定的矩阵 Log 反传、上游编码器 Jacobian 和读出求解精度必须分开测。
+设一批样本的读出特征堆成矩阵 (Z)，logits 为 (S=ZW)。若存在头部扰动 (U) 满足
 
-## E0、E1、B3 和 E2 如何拆开问题
+$$
+ZU=0,
+$$
 
-- **E0** 在 20 个 Raw/Log checkpoint endpoint 上测固定特征、参考读出、梯度方向和失配量。
-- **E1** 用短 horizon 分叉编码器，检查反馈差异是否改变后续表示。
-- **B3** 比较 native、two-forward native 和 adaptive reference correction。Raw 与 Log 的收益方向不同，出现几何依赖边界。
-- **E2** 搜索前向弱方向。若 $ZU$ 很小而 $RU^\top$ 不小，当前 logits 近似不变也不能推出编码器梯度不变。
+则 (W) 与 (W+U) 在当前批次产生相同的 logits。令 (R=\partial L/\partial S)，特征梯度分别为
 
-这些机制诊断主要使用 FIT-only 协议。HELD 没有被当成诊断输入。
+$$
+\nabla_ZL=RW^\top,
+$$
+
+以及
+
+$$
+\nabla_ZL'=R(W+U)^\top.
+$$
+
+因此
+
+$$
+\Delta\nabla_ZL=RU^\top.
+$$
+
+这个构造排除了一个常见误解：预测不变不代表学习信号不变。它也说明，评估一个读出不能只看当前 accuracy 或 head loss，还要测它对 encoder 的反向作用。
+
+## 3. Loewner 差商怎样进入反馈
+
+令 (C=U\Lambda U^\top) 为对称正定矩阵，(Lambda=\operatorname{diag}(\lambda_1,\ldots,\lambda_d))。对谱函数 (phi)，Fréchet 导数可写成
+
+$$
+D\phi_C[H]=U\!\left(G_\phi(\Lambda)\odot(U^\top H U)\right)U^\top.
+$$
+
+Loewner 差商矩阵的元素为
+
+$$
+(G_\phi)_{ij}=\begin{cases}
+\dfrac{\phi(\lambda_i)-\phi(\lambda_j)}{\lambda_i-\lambda_j},&\lambda_i\ne\lambda_j,\\[9pt]
+\phi'(\lambda_i),&\lambda_i=\lambda_j.
+\end{cases}
+$$
+
+所以前向几何和反向几何由不同对象控制。前向特征主要依赖 (phi(\lambda_i))，而局部梯度扰动经过 (G_\phi) 的逐元素调制。矩阵 Log 满足
+
+$$
+\phi(\lambda)=\log\lambda,\qquad \phi'(\lambda)=\frac1\lambda.
+$$
+
+小特征值会让某些局部方向更加敏感。但必须将以下三件事分开验证：
+
+1. 稳定 Log 反传是否正确实现了近重根的连续极限；
+2. (G_\phi) 如何调制上游扰动；
+3. 有限步读出误差如何通过这个 Jacobian 进入 encoder。
+
+## 4. E0、E1、B3、E2 的分工
+
+- **E0**：在 20 个 Raw/Log endpoint 上固定 encoder，分别求当前读出与参考读出，记录梯度范数、余弦相似度和 (e_\psi)。
+- **E1**：从同一个 checkpoint 分叉短 horizon，比较当前读出与参考读出对后续 encoder 表示的影响。
+- **B3**：在相同训练预算下比较 native、two-forward native 和 reference correction，检查收益是否随几何改变。
+- **E2**：寻找满足 (lVert ZU\rVert) 较小而 (lVert RU^\top\rVert) 较大的方向，检验前向弱方向是否真的会改变反馈。
+
+这些实验主要使用 FIT-only 协议。它们的作用是识别机制，不是把短 horizon 结果升级成 HELD 泛化结论。
