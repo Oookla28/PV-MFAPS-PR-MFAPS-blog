@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 560" role="img">
+<style>text{font-family:"Songti SC","STSong","SimSun",serif} .axis{stroke:#6d6962;stroke-width:1} .grid{stroke:#e6dfd4;stroke-width:1} .label{fill:#4b4742;font-size:14px} .small{fill:#766f66;font-size:12px} .title{fill:#292621;font-size:22px;font-weight:600} </style>
+<text class="title" x="92" y="35">HELD macro–tail frontier</text>
+<line class="grid" x1="92" y1="488.0" x2="924" y2="488.0"/><text class="small" x="80" y="492.0" text-anchor="end">0.44</text>
+<line class="grid" x1="92" y1="404.4" x2="924" y2="404.4"/><text class="small" x="80" y="408.4" text-anchor="end">0.45</text>
+<line class="grid" x1="92" y1="320.8" x2="924" y2="320.8"/><text class="small" x="80" y="324.8" text-anchor="end">0.46</text>
+<line class="grid" x1="92" y1="237.2" x2="924" y2="237.2"/><text class="small" x="80" y="241.2" text-anchor="end">0.48</text>
+<line class="grid" x1="92" y1="153.6" x2="924" y2="153.6"/><text class="small" x="80" y="157.6" text-anchor="end">0.49</text>
+<line class="grid" x1="92" y1="70.0" x2="924" y2="70.0"/><text class="small" x="80" y="74.0" text-anchor="end">0.50</text>
+<line class="axis" x1="92.0" y1="488" x2="92.0" y2="494"/><text class="small" x="92.0" y="512" text-anchor="middle">0.26</text>
+<line class="axis" x1="508.0" y1="488" x2="508.0" y2="494"/><text class="small" x="508.0" y="512" text-anchor="middle">0.28</text>
+<line class="axis" x1="924.0" y1="488" x2="924.0" y2="494"/><text class="small" x="924.0" y="512" text-anchor="middle">0.30</text>
+<line class="axis" x1="92" y1="70" x2="92" y2="488"/><line class="axis" x1="92" y1="488" x2="924" y2="488"/>
+<text class="label" x="508.0" y="546" text-anchor="middle">HELD Tail-10%</text><text class="label" transform="translate(20 279.0) rotate(-90)" text-anchor="middle">HELD Macro-F1</text>
+<circle cx="214.2" cy="381.5" r="9" fill="#5b7fa3"/><text class="small" x="226.2" y="371.5">bs_fixed_k_matched_B02</text>
+<circle cx="461.8" cy="237.0" r="9" fill="#3b8e68"/><text class="small" x="473.8" y="227.0">effective_number</text>
+<circle cx="874.5" cy="181.0" r="9" fill="#b85c38"/><text class="small" x="886.5" y="171.0">pr_pv_mfaps</text>
+</svg>
