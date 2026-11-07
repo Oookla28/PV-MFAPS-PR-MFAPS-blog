@@ -15,242 +15,191 @@ window.MathJax={tex:{inlineMath:[['\\(','\\)'],['$','$']],displayMath:[['\\[','\
 <body>
 <div class="layout">
 <aside class="rail">
-  <div class="eyebrow">PlantSPD · Feedback Geometry</div>
+  <div class="eyebrow">PlantSPD · Long-tail disease recognition</div>
   <h2>反馈几何与分区鲁棒内循环分配</h2>
   <nav>
-    <a href="#thesis">主旨</a>
-    <a href="#origin">起点</a>
-    <a href="#data">数据</a>
-    <a href="#mechanism">机制</a>
-    <a href="#method">方法</a>
-    <a href="#experiments">实验</a>
-    <a href="#system">系统</a>
-    <a href="#evidence">边界</a>
+    <a href="#opening">开端</a>
+    <a href="#spd">SPD</a>
+    <a href="#feedback">反馈</a>
+    <a href="#stagnation">偏差停滞</a>
+    <a href="#plugin">实测插件</a>
+    <a href="#dro">DRO</a>
+    <a href="#fused">Fused</a>
+    <a href="#result">结果</a>
   </nav>
-  <div class="hint">宋体阅读版<br>公式由 MathJax 渲染<br>正文承载主线，章节只补充细节<br>更新：2026-11-07</div>
+  <div class="hint">宋体阅读版<br>公式由 MathJax 渲染<br>正文承载主线，章节补充推导<br>更新：2026-11-07</div>
 </aside>
 <main class="main">
-<section class="hero" id="thesis">
-  <div class="kicker">一份从 PlantSPD 出发、经过层层转折与系统重写后留下的研究记录</div>
-  <h1>从反馈失配到分区鲁棒内循环分配</h1>
-  <p class="hero-subtitle">PlantSPD 长尾训练中，读出几何如何改变编码器的学习反馈</p>
-  <p class="lead">最初的问题看起来像一个熟悉的表示比较：Raw、矩阵 Log，究竟哪一种 SPD 几何更适合植物病害识别？真正的转折发生在固定特征读出已经接近完美，而联合训练仍然走向不同轨迹之后。研究由此从“比较几何”转向“测量反馈”，再转向“为反馈分配内循环精度”，最后进入分区异质性和真实 GPU 执行图。</p>
-  <div class="meta"><span class="pill">69 类植物病害</span><span class="pill">FIT 4,184 / HELD 1,046</span><span class="pill">头尾比 68.8</span><span class="pill">A100-SXM4-40GB</span><span class="pill">最终 24 states</span></div>
+<section class="hero" id="opening">
+  <div class="kicker">PlantSPD · 植物病害识别 · 长尾训练</div>
+  <h1>从反馈几何到分区鲁棒内循环分配</h1>
+  <p class="hero-subtitle">一次由病害检测问题推动的 SPD 长尾训练研究</p>
+  <p class="lead">故事的开端是病害检测本身。双模型 C0+S2、重采样和一套完整的工程管线可以先把系统跑起来，却没有回答一个更难的问题。为什么模型在 FIT 上已经能够读出类别信息，到了 HELD，尾部类别却出现明显坍塌。研究从分类器和采样策略出发，最后落到了 SPD 协方差表示、Loewner 差商、读出反馈、离散内循环分配和真实 GPU 执行图。</p>
+  <div class="meta"><span class="pill">69 类病害</span><span class="pill">FIT 4,184 / HELD 1,046</span><span class="pill">计数范围 5–344</span><span class="pill">头尾比 68.8</span><span class="pill">A100-SXM4-40GB</span></div>
 </section>
 
-<section class="section opening" id="summary">
-  <div class="section-label">先把结论放在读者面前</div>
-  <h2>三条线同时成立，结论才完整</h2>
-  <p class="intro">这项工作最后没有收敛成“某个谱函数在所有数据上更好”的简单答案。它留下了三个彼此独立、又能互相解释的结果。</p>
+<section class="section opening-block">
+  <blockquote>前向可读，不等于反向反馈可用。长尾训练真正需要分配的，是读出反馈的精度。</blockquote>
   <div class="grid three highlight-grid">
-    <article class="card highlight"><span class="number">01</span><h3>机制</h3><p>固定特征上“读得出来”，不等于当前读出会向编码器传回同一条有用梯度。这个差异可以用读出反馈失配 (e_psi) 直接测量。</p></article>
-    <article class="card highlight"><span class="number">02</span><h3>分配</h3><p>长尾训练真正需要决定的不是给哪一类加权，而是每个类的读出内循环要解到什么精度。PV-MFAPS 用风险包络和有限动作 DP 做这件事。</p></article>
-    <article class="card highlight"><span class="number">03</span><h3>系统</h3><p>Fused 路径把逻辑上的多次 native/reference 计算合并到一次物理 encoder forward。动作序列不变，真实 wall-clock 和 FLOPs 才能被公平比较。</p></article>
+    <article class="card highlight"><span class="number">01</span><h3>反馈机制</h3><p>同一批特征可以被当前读出和充分拟合的读出同时解释，但两者产生的 encoder gradient 仍然不同。</p></article>
+    <article class="card highlight"><span class="number">02</span><h3>风险分配</h3><p>内循环步数 (k) 被放进有限动作风险包络，类别动作由稳定性、收缩率和真实成本共同决定。</p></article>
+    <article class="card highlight"><span class="number">03</span><h3>执行协同</h3><p>Fused 路径把重复 encoder work 合并到单一计算图，保持逻辑动作不变，同时降低物理 forward 次数。</p></article>
   </div>
-  <blockquote>真正被研究的对象不是一个“更强的头”，而是一个近似读出如何改变编码器下一步会看到的世界。</blockquote>
-  <div class="callout"><b>如何准确描述这组结果。</b> 在本次注册的 PlantSPD matched protocol 内，PR-PV-MFAPS 相对 fixed-k 同时提高 HELD Macro-F1 与 Tail-10%，并满足 measured fixed-k 的成本门槛。相对 effective-number，它在相同 FLOPs 下给出更高的两项指标，但 wall-clock 略高。因此可以称为本协议内的 measured Pareto point，不能写成社区通用 SOTA、跨任务泛化或普适改进。</div>
+  <div class="callout"><b>本次研究的主结果。</b> 在 PlantSPD 的注册 matched protocol 中，PR-PV-MFAPS 的 HELD Macro-F1 为 0.4841，Tail-10% 为 0.2976。相对 fixed-k 分别提高 2.88 个百分点和 3.17 个百分点，最大 wall ratio 为 0.9974，最大 FLOPs ratio 为 0.8889。</div>
 </section>
 
-<section class="section" id="origin">
-  <div class="section-label">01 · 起点</div>
-  <h2>从“Raw 还是 Log”开始，问题很快变得不再是 Raw 还是 Log</h2>
-  <p>PlantSPD 把图像空间 token 组织成 SPD 协方差表示，再交给分类头。对固定编码器，Raw 与 Log 都可以被重新拟合的 affine readout 读出。这个事实先排除了一个过于直接的解释：不能把联合训练差异简单写成“Log 丢了标签信息”。</p>
-  <p>真正需要区分的是四个对象：</p>
-  <div class="grid four compact-grid">
-    <div class="card"><b>表示是否含有信息</b><p>固定 encoder 后用充分读出的可达性能。</p></div>
-    <div class="card"><b>读出是否已经就绪</b><p>当前 (W_t) 与同一表示上的 (W^*(psi)) 相差多少。</p></div>
-    <div class="card"><b>反馈是否可靠</b><p>两种读出产生的 encoder gradient 是否同向。</p></div>
-    <div class="card"><b>计算是否值得</b><p>修正一次反馈需要多少真实 forward、backward 和 wall-clock。</p></div>
-  </div>
-  <blockquote>表示里有信息，和当前读出是否会把正确的信号传回编码器，是两个问题。把它们混在一起，后面的每一次优化都会被错误的诊断牵着走。</blockquote>
-  <figure class="figure"><img src="figures/research-timeline.svg" alt="研究时间线"><figcaption>研究顺序不是方法名的堆叠，而是由每一轮实验留下的未解决问题推动。</figcaption></figure>
-</section>
-
-<section class="section" id="data">
-  <div class="section-label">02 · 数据与评估边界</div>
-  <h2>长尾和配对分区，把“谁需要更多计算”变成了可检验的问题</h2>
-  <p>数据包含 69 个病害类别。FIT 中最少类别有 5 个样本，最多类别有 344 个样本，头尾比为 68.8。训练阶段只使用 FIT，所有动作策略、阈值和成本模型都在 HELD 读取前冻结。冻结后，HELD 只读取一次。</p>
+<section class="section" id="spd">
+  <div class="section-label">病害检测把问题推向 SPD</div>
+  <h2>工程完整之后，真正的问题出现在协方差特征里</h2>
+  <p>病害图像首先经过空间特征提取，再把 token 或 patch 特征组织为 SPD 协方差矩阵。Raw、矩阵 Log 和其他谱映射改变了协方差所在的表示坐标。固定 encoder 后，重新拟合 affine readout，Raw 与 Log 都能读出类别信息。这个结果说明标签信息并没有因为换坐标而自动消失。</p>
+  <p>联合训练的差异来自另一个位置。encoder 还在变化，readout 却只完成了有限步优化。此时分类头不只是输出层，它还是反馈通道。读出误差经过 SPD 映射的 Jacobian 投影回 encoder，可能改变后续表示的演化方向。</p>
   <div class="grid metrics">
-    <div class="card metric"><div class="value">69</div><div class="label">类别数</div><div class="note">植物病害识别</div></div>
-    <div class="card metric"><div class="value">4,184</div><div class="label">FIT 样本</div><div class="note">用于校准和训练</div></div>
-    <div class="card metric"><div class="value">1,046</div><div class="label">HELD 样本</div><div class="note">freeze 后一次性读取</div></div>
-    <div class="card metric"><div class="value">68.8×</div><div class="label">头尾比</div><div class="note">计数范围 5–344</div></div>
+    <div class="card metric"><div class="value">69</div><div class="label">病害类别</div><div class="note">FIT 计数 5–344</div></div>
+    <div class="card metric"><div class="value">4,184</div><div class="label">FIT 样本</div><div class="note">用于训练和校准</div></div>
+    <div class="card metric"><div class="value">1,046</div><div class="label">HELD 样本</div><div class="note">freeze 后读取一次</div></div>
+    <div class="card metric"><div class="value">68.8×</div><div class="label">头尾比</div><div class="note">极端长尾</div></div>
   </div>
-  <div class="table-wrap"><table><thead><tr><th>边界</th><th>执行方式</th><th>它保护了什么</th></tr></thead><tbody>
-    <tr><td>FIT / HELD</td><td>FIT 可用于校准和训练，HELD 在 freeze 后只读一次</td><td>避免用验证结果选择策略</td></tr>
-    <tr><td>p0 / p1</td><td>两个分区逐类计数完全配对，最大计数差为 0</td><td>分区动作变化不能归因于频率差异</td></tr>
-    <tr><td>动作集</td><td>(mathcal K={0,1,2,4})，(alpha) 取注册离散值</td><td>保证 DP 和成本比较可复核</td></tr>
-    <tr><td>成本</td><td>最终使用 measured fixed-k 成本，proxy 只用于 preflight</td><td>避免“理论省算力、实际更慢”</td></tr>
-  </tbody></table></div>
-  <p class="small">p0/p1 的计数配对是后续 PR 分析的关键识别条件。它把频率因素固定住，让动作差异必须回到 partition-specific risk geometry。</p>
+  <figure class="figure"><img src="figures/research-timeline.svg" alt="从病害检测到反馈几何的研究路径"><figcaption>研究路径从病害检测、C0+S2 与重采样开始，经过 SPD 协方差和反馈机制，进入风险分配、Fused 执行与分区鲁棒策略。</figcaption></figure>
 </section>
 
-<section class="section" id="mechanism">
-  <div class="section-label">03 · 机制线</div>
-  <h2>前向预测可以几乎不变，反向学习却可以完全换一条路</h2>
-  <p>令 (C_psi(x_i)) 是编码器产生的 SPD 矩阵，(phi) 是谱映射，(z_psi(x_i)) 是把 (phi(C_psi(x_i))) 向量化后的读出特征。对读出 (W) 和编码器参数 (psi)，考虑显式正则化目标：</p>
+<section class="section" id="feedback">
+  <div class="section-label">前向可读与反向可用之间</div>
+  <h2>反馈失配可以被写成一个梯度差</h2>
+  <p>对样本 (x_i)，令 encoder 产生 SPD 矩阵 (C_\psi(x_i))，谱映射为 (phi)，对称矩阵向量化算子为 (operatorname{svec})。读出特征为</p>
   <div class="math-block">\[
-  z_\psi(x_i)=\operatorname{svec}\!\left(\phi(C_\psi(x_i))\right),\qquad
-  L(\psi,W)=\frac1n\sum_{i=1}^n\ell\!\left(Wz_\psi(x_i),y_i\right)+\frac{\lambda}{2}\lVert W\rVert_F^2.
+  z_\psi(x_i)=\operatorname{svec}\!\left(\phi(C_\psi(x_i))\right).
   \]</div>
-  <p>在固定 (psi) 时，读出层的参考解定义为</p>
+  <p>联合目标写成</p>
+  <div class="math-block">\[
+  L(\psi,W)=\frac1n\sum_{i=1}^{n}\ell\!\left(Wz_\psi(x_i),y_i\right)+\frac{\lambda}{2}\lVert W\rVert_F^2.
+  \]</div>
+  <p>固定表示后，充分拟合的参考读出是</p>
   <div class="math-block">\[
   W^*(\psi)=\arg\min_W L(\psi,W).
   \]</div>
-  <p>训练中使用的是有限步得到的 (W_t)，因此编码器真正收到的梯度和理想参考梯度分别为</p>
+  <p>当前训练头 (W_t) 和参考头分别给出</p>
   <div class="math-block">\[
   g_{\mathrm{actual}}=\nabla_\psi L(\psi,W_t),\qquad
   g_{\mathrm{ref}}=\nabla_\psi L\!\left(\psi,W^*(\psi)\right),\qquad
   e_\psi=g_{\mathrm{actual}}-g_{\mathrm{ref}}.
   \]</div>
-  <p>这里的 (e_psi) 不是简单的 head loss gap。它经过 (z_psi) 对 (psi) 的 Jacobian 投影，直接改变下一步 encoder update。一个特别直观的反例是：把当前 batch 的特征堆成 (Z)，若头部扰动 (U) 满足 (ZU=0)，则 (W) 与 (W+U) 在该 batch 上产生相同 logits；但若 (R=partial L/partial(ZW))，则</p>
+  <p>这个 (e_\psi) 是反馈失配。它衡量当前 readout 还没有充分收敛时，encoder 实际收到的更新和参考更新之间的差异。</p>
+  <h3>Loewner 差商把谱函数接到反馈方向</h3>
+  <p>设 (C=U\Lambda U^\top) 是对称正定矩阵。谱函数的 Fréchet 导数为</p>
   <div class="math-block">\[
-  \nabla_ZL=RW^\top,\qquad
-  \nabla_ZL' =R(W+U)^\top,\qquad
-  \Delta\nabla_ZL=RU^\top.
+  D\phi_C[H]=U\!\left(G_\phi(\Lambda)\odot(U^\top H U)\right)U^\top.
   \]</div>
-  <blockquote>前向等价只说明当前输出接近，不能说明这两个读出会把同一条更新信号送回表示。</blockquote>
-  <h3>Loewner 差商是几何和反馈之间的桥</h3>
-  <p>设 (C=ULambda U^\top) 是 SPD 矩阵。对谱函数 (phi)，Fréchet 导数为</p>
-  <div class="math-block">\[
-  D\phi_C[H]=U\!\left(G_\phi(\Lambda)\odot(U^\top H U)\right)U^\top,
-  \]</div>
-  <p>其中 Loewner 差商矩阵满足</p>
+  <p>差商矩阵的元素为</p>
   <div class="math-block">\[
   (G_\phi)_{ij}=\begin{cases}
-  \dfrac{\phi(\lambda_i)-\phi(\lambda_j)}{\lambda_i-\lambda_j},&\lambda_i\ne\lambda_j,\\[8pt]
+  \dfrac{\phi(\lambda_i)-\phi(\lambda_j)}{\lambda_i-\lambda_j},&\lambda_i\ne\lambda_j,\\[9pt]
   \phi'(\lambda_i),&\lambda_i=\lambda_j.
   \end{cases}
   \]</div>
-  <p>前向表示由 (phi(lambda_i)) 决定，反馈方向由 (G_phi) 调制。对矩阵 Log，(phi'(lambda)=1/lambda)，小特征值会放大一部分局部扰动。这里必须把三个问题分开：Log 的导数怎样被数值计算，几何映射本身怎样调制梯度，有限步读出误差怎样进入 encoder。E0、E1、B3、E2 正是沿着这三层拆开的。</p>
-  <div class="grid two"><figure class="figure"><img src="figures/risk-envelopes.svg" alt="风险包络"><figcaption>p0 与 p1 的风险曲率并不由类别频率决定。它们决定了同一个动作在两个分区中的代价。</figcaption></figure><figure class="figure"><img src="figures/epsilon-action-changes.svg" alt="epsilon 动作变化"><figcaption>11 个 epsilon 值产生 5 个策略向量，鲁棒项是 live 的，但 p1 存在结构性下界。</figcaption></figure></div>
+  <p>前向表示由 (phi(\lambda_i)) 决定，局部反馈由 (G_\phi) 调制。矩阵 Log 满足 (phi'(\lambda)=1/\lambda)，小特征值会放大一部分局部方向。E0、E1、B3 和 E2 分别测量固定特征读出、短 horizon 表征变化、reference correction 和前向弱方向。</p>
+  <blockquote>如果某个头部扰动 (U) 满足 (ZU=0)，当前 logits 可以保持不变，而 (Delta\nabla_ZL=RU^\top) 仍然可以不为零。前向等价与反馈等价因此必须分开检验。</blockquote>
+  <div class="grid two"><figure class="figure"><img src="figures/risk-curvature-heatmap.svg" alt="风险曲率热力图"><figcaption>边界类别的风险代理同时受到类别与分区影响。热力图展示的是 FIT 校准值。</figcaption></figure><figure class="figure"><img src="figures/bias-stagnation.svg" alt="偏差停滞与稳定性代价"><figcaption>以实测 (ho) 和校准的稳定性经验代理绘制。红线不是无条件的指数稳定性定理。</figcaption></figure></div>
 </section>
 
-<section class="section" id="method">
-  <div class="section-label">04 · 从诊断到算法</div>
-  <h2>PV-MFAPS 不是给尾部“更多权重”，而是给反馈误差一个可计算的包络</h2>
-  <p>第一轮实验表明，无约束的极小极大分配会把预算集中到少数类别，均值调度又会把噪声带进整个梯度。于是我们把每个类别的内循环动作 (k) 写成有限动作风险：</p>
+<section class="section" id="stagnation">
+  <div class="section-label">偏差停滞成为分配规则</div>
+  <h2>内循环步数增加之后，收益开始停滞</h2>
+  <p>在 FIT calibration 中，两个分区的内层收缩率中位数约为 (0.999873) 和 (0.999898)。当 (ho) 接近 1 时，偏差项 (ho^{2k}) 在有限动作范围内下降得很慢。以 (k=16) 为例，校准记录的偏差收益约为 0.405%，而稳定性和置信经验代理累计增长约 17.3%。</p>
   <div class="math-block">\[
   R_c(k)=A_c\rho_c^{2k}+s_c(k)+\beta_c(k)+e_c(\delta).
   \]</div>
-  <figure class="figure"><img src="figures/bias-variance-envelope.svg" alt="偏差停滞与稳定性包络"><figcaption>在观测到的中位收缩率 \(\rho\approx0.999873\) 下，\(k=16\) 的偏差项只下降约 0.41%，而显式的 \(1.01^k\) 统计代理上升约 17.3%。这张图解释了为什么大动作集会倾向于选择小 \(k\)，但它是注册风险代理的结构分析，不是总体泛化定理。</figcaption></figure>
-  <p>第一项是读出误差的收缩包络。(s_c(k)) 记录有限批次统计，(eta_c(k)) 是在明确假设下的算法稳定性项，(e_c(delta)) 是置信半径。关键是把它们的来源分开，避免把经验曲线包装成普适定理。</p>
-  <h3>稳定性项怎样推出来</h3>
-  <p>假设类别读出目标是 (lambda)-strongly convex 且 (L)-smooth，内循环使用步长 (etale 1/L)。梯度下降的轨迹收缩率写作</p>
+  <p>在 (lambda)-strongly convex、(L)-smooth 的内层目标和 (eta\le 1/L) 的步长条件下，轨迹收缩率可以写成</p>
   <div class="math-block">\[
   \rho=\max\{|1-\eta\lambda|,|1-\eta L|\}<1.
   \]</div>
-  <p>若替换一个样本最多改变一次内层梯度 (2G/n_c)，对原数据集 (S) 和替换后的 (S') 进行耦合，则</p>
+  <p>相邻数据集替换一个样本，且单步梯度扰动不超过 (2G/n_c) 时，(k) 步轨迹满足</p>
   <div class="math-block">\[
-  \begin{aligned}
   \lVert W_k(S)-W_k(S')\rVert
-  &\le 2\eta G\sum_{j=0}^{k-1}\frac{\rho^j}{n_c}\\
-  &=\frac{2\eta G}{n_c(1-\rho)}(1-\rho^k).
-  \end{aligned}
+  \le \frac{2\eta G}{n_c}\sum_{j=0}^{k-1}\rho^j
+  =\frac{2\eta G}{n_c(1-\rho)}(1-\rho^k).
   \]</div>
-  <p>若外层损失对读出参数是 (L_\ell)-Lipschitz，可得到条件稳定性贡献</p>
+  <p>若外层损失对读出参数是 (L_\ell)-Lipschitz，则条件稳定性项为</p>
   <div class="math-block">\[
   \beta_c(k)\le \frac{2L_\ell\eta G^2}{n_c(1-\rho_c)}(1-\rho_c^k).
   \]</div>
-  <p>这个项在该假设下趋于饱和，而不是指数爆炸。实验里若观察到尾部动作随 (k) 变大而恶化，只能由额外的统计项、估计偏差或真实训练轨迹支持，不能从这条稳定性式子直接推出“方差必然爆炸”。</p>
-  <h3>分区鲁棒版本与 KL 对偶</h3>
-  <p>当 p0 和 p1 的 FIT 风险出现异质性时，两个分区共享同一动作向量 (a=(a_1,\ldots,a_C))。令 (v=(R_0(a),R_1(a)))，名义分区混合为 (ar u)，KL 歧义集为</p>
+  <p>因此，(k=0) 在部分类别上并不代表内循环没有价值，而是说明在当前 (ho_c)、有限样本和 measured budget 下，继续求解的边际收益已经低于风险和成本的增加。</p>
+</section>
+
+<section class="section" id="plugin">
+  <div class="section-label">一次自行执行的插件实验</div>
+  <h2>Balanced Softmax 插件把机制放回真实训练链</h2>
+  <p>这组数据来自自行执行的 matched plugin run，不来自外部论文或社区表格。实验固定同一 backbone、同一数据分区、同一训练步数和同一冻结协议，使用两个 partition 与三个 training seeds。所有 FIT artifact 在 HELD 读取前冻结，最终一次性读取 50,208 个样本结果。</p>
+  <div class="table-wrap"><table><thead><tr><th>Arm</th><th>HELD Macro-F1</th><th>HELD Tail-10%</th><th>相对 Balanced Softmax 的 Macro</th><th>相对 Balanced Softmax 的 Tail</th><th>wall / FLOPs</th></tr></thead><tbody>
+    <tr><td>balanced_softmax</td><td>0.4727</td><td>0.2659</td><td>—</td><td>—</td><td>0.555 s / (1.077\times10^{12})</td></tr>
+    <tr><td>bs_fixed_k_matched_B02</td><td>0.4553</td><td>0.2659</td><td>−1.74 pp</td><td>0.00 pp</td><td>0.630 s / (1.257\times10^{12})</td></tr>
+    <tr><td><b>bs_pcfa</b></td><td><b>0.4773</b></td><td><b>0.2738</b></td><td><b>+0.46 pp</b></td><td><b>+0.79 pp</b></td><td>0.571 s / (1.077\times10^{12})</td></tr>
+    <tr><td>native_plus_pv_mfaps</td><td>0.4653</td><td>0.2778</td><td>−0.74 pp</td><td>+1.19 pp</td><td>0.560 s / (1.077\times10^{12})</td></tr>
+    <tr><td>effective_number</td><td>0.4760</td><td>0.2778</td><td>+0.33 pp</td><td>+1.19 pp</td><td>0.537 s / (1.077\times10^{12})</td></tr>
+  </tbody></table></div>
+  <p>这轮实验的作用是把算法机制接到真实的 Balanced Softmax 长尾基线上。bs_pcfa 在相同数量级 FLOPs 下抬高了两项 HELD 指标。native_plus_pv_mfaps 提升尾部但降低宏观指标，说明读出反馈分配和 long-tail loss 的作用不能被合并成一条单调的加法。后续 PR-PV-MFAPS 使用分区鲁棒目标，将这一观察进一步写进共享策略。</p>
+</section>
+
+<section class="section" id="dro">
+  <div class="section-label">分区异质性与 KL-DRO</div>
+  <h2>两个分区的频率被配对固定，动作翻转只能来自风险曲率</h2>
+  <p>p0 与 p1 的 69 个类别逐类计数完全相同。分区异质性 gate 的 Macro gap 为 0.0139206464，超过预注册阈值 0.01，于是共享策略的分区鲁棒扩展被注册。令分区风险向量为 (v=(R_0(a),R_1(a)))，名义混合为 (ar u)，KL 歧义集为</p>
   <div class="math-block">\[
-  \mathcal U_\varepsilon=\left\{u\in\Delta^2:D_{\mathrm{KL}}(u\Vert\bar u)\le\varepsilon\right\}.
-  \]</div>
-  <p>鲁棒风险是</p>
-  <div class="math-block">\[
+  \mathcal U_\varepsilon=\left\{u\in\Delta^2:D_{\mathrm{KL}}(u\Vert\bar u)\le\varepsilon\right\},
+  \qquad
   \Phi_\varepsilon(v)=\sup_{u\in\mathcal U_\varepsilon}u^\top v.
   \]</div>
-  <p>利用 KL 对偶，可写成一维温度变量 (	au>0) 的优化：</p>
+  <p>KL 对偶将鲁棒聚合写成</p>
   <div class="math-block">\[
-  \Phi_\varepsilon(v)=\inf_{\tau>0}\left[\tau\varepsilon+\tau\log\!\left(\sum_{p=0}^{1}\bar u_p\exp(v_p/\tau)\right)\right].
+  \Phi_\varepsilon(v)=\inf_{\tau>0}\left\{\tau\varepsilon+\tau\log\!\left(\sum_{p=0}^{1}\bar u_p\exp(v_p/\tau)\right)\right\}.
   \]</div>
-  <p>当 (arepsilon=0) 时，它退化为名义分区平均。当 (arepsilon) 增大时，目标更接近最差分区。该映射还满足</p>
+  <p>有限动作集合取 (mathcal K=\{0,1,2,4\})。DP 对每个类别累积成本和两个分区的风险向量，并删除被其他状态同时支配的状态。最终在 measured budget 内最小化 (Phi_\varepsilon)。若量化误差满足 (lVert R-\widetilde R\rVert_\infty\le\Delta_R)，则</p>
   <div class="math-block">\[
-  |\Phi_\varepsilon(v)-\Phi_\varepsilon(w)|\le\lVert v-w\rVert_\infty,
+  \left|\Phi_\varepsilon(R)-\Phi_\varepsilon(\widetilde R)\right|\le\Delta_R.
   \]</div>
-  <p>因此风险量化误差不会被鲁棒聚合放大超过最大分区误差。</p>
-  <h3>有限动作 DP 怎样保证全局可复核</h3>
-  <p>动作集合为 (mathcal A=mathcal K\timesmathcal G)，其中 (mathcal K={0,1,2,4})。用离散成本桶 (b) 和前 (c) 个类别定义状态 (D_c(b,r))，(r) 表示累计风险向量或其量化索引。逐类转移为</p>
-  <div class="math-block">\[
-  D_c(b,r)=\min_{a\in\mathcal A}\;D_{c-1}\!\left(b-q_c(a),\;r-\widehat r_c(a)\right)+\widehat r_c(a).
-  \]</div>
-  <p>最终状态在预算 (B) 内取最小 (Phi_\varepsilon(r))，并回溯每个类的动作。量化后的策略与连续目标之间的误差由 (Phi) 的 1-Lipschitz 性给出：若每个分区风险量化误差不超过 (Delta)，则目标误差不超过 (Delta) 的无穷范数上界。这个结论只证明有限动作问题求解和量化误差控制，不等于证明神经网络层面的总体泛化定理。</p>
-  <div class="callout"><b>公式的作用。</b> 这些式子不是为了把启发式改名为理论。它们把可测的反馈误差、可解释的稳定性项、分区风险和实际成本放进同一个有限优化问题，随后每一项都能在 manifest 和实验表中找到来源。</div>
+  <div class="grid two"><figure class="figure"><img src="figures/dro-action-flips.svg" alt="DRO 动作翻转"><figcaption>Class 38 的 (k=2\to0) 与 Class 68 的 (k=0\to1) 都沿着 p0 的控制风险面移动。</figcaption></figure><figure class="figure"><img src="figures/risk-curvature-heatmap.svg" alt="DRO 风险曲率热力图"><figcaption>这两个类别的动作翻转发生在配对频率条件下，因此不是频率驱动的重采样效应。</figcaption></figure></div>
+  <p>epsilon sweep 的 11 个取值产生 5 个不同动作向量。选取 (arepsilon=0.01) 后，只有两个类别发生变化。Class 38 的 FIT 计数为 108，(k=2) 会使 p0 风险上升，策略回到 (k=0)。Class 68 的 FIT 计数为 12，(k=1) 降低 p0 风险，即使 p1 略有上升，策略仍选择 (k=1)。动作变化很少，但方向被风险包络逐项解释。</p>
 </section>
 
-<section class="section" id="experiments">
-  <div class="section-label">05 · 实验与反转</div>
-  <h2>每次转折都删掉一个过于简单的解释</h2>
-  <p>第一轮 3090 结果把 Macro-F1、Tail-10% 和算力预算之间的冲突暴露出来。它没有直接给出最终方案，却告诉我们哪些路线不能再用。</p>
-  <div class="grid four compact-grid">
-    <div class="card"><span class="tag open">转折</span><h3>mean TF-GPS</h3><p>FIT 和 HELD 同时下降。类均值调度把尾部估计噪声带入了全局反馈。</p></div>
-    <div class="card"><span class="tag conditional">折中</span><h3>CVaR-TF-GPS</h3><p>尾部有所改善，但 HELD Macro-F1 仍低于 effective-number。</p></div>
-    <div class="card"><span class="tag conditional">高成本</span><h3>corrected K-MFAPS</h3><p>HELD Tail-10% 达到 0.2778，但实际成本约 (2.154\times10^{12}) FLOPs。</p></div>
-    <div class="card"><span class="tag open">边界</span><h3>cost-aware PC-FA</h3><p>FLOPs 合规，wall-clock 和 HELD tail gate 没有同时通过。</p></div>
-  </div>
-  <div class="table-wrap"><table><thead><tr><th>分支</th><th>HELD Macro-F1</th><th>HELD Tail-10%</th><th>wall / FLOPs 解释</th></tr></thead><tbody>
-    <tr><td>effective-number</td><td>0.4760</td><td>0.2778</td><td>宏观强的基线</td></tr>
-    <tr><td>fixed-k matched</td><td>0.4553</td><td>0.2659</td><td>最终 PR 的成本参照</td></tr>
-    <tr><td>corrected K-MFAPS</td><td>0.4615</td><td>0.2778</td><td>tail trade-off，成本很高</td></tr>
-    <tr><td>cost-aware PC-FA</td><td>0.4680</td><td>0.2381</td><td>FIT tail 增益没有在 HELD 复现</td></tr>
-    <tr><td>PR-PV-MFAPS</td><td><b>0.4841</b></td><td><b>0.2976</b></td><td>相对 fixed-k 的最终 matched 结果</td></tr>
-  </tbody></table></div>
-  <figure class="figure"><img src="figures/pareto-macro-tail.svg" alt="Macro-F1 与 Tail-10% 的 Pareto 图"><figcaption>把宏观性能和尾部性能放在同一张图，才能看见方法究竟改善了哪一条边界。</figcaption></figure>
-  <h3>epsilon sweep：鲁棒项是 live 的，但 p1 有结构性下界</h3>
-  <p>11 个 (arepsilon) 值产生 5 个不同动作向量。最终选取 (arepsilon=0.01)，相对 (arepsilon=0.1) 只改变两个类别的动作：class 38 从 (k=2) 降到 (k=0)，class 68 从 (k=0) 升到 (k=1)。p0 与 p1 的逐类 FIT 计数完全一致，所以这次翻转不能解释成重新采样。</p>
-  <div class="grid two"><figure class="figure"><img src="figures/epsilon-action-changes.svg" alt="epsilon 改变的动作数量"><figcaption>动作差异集中在两个类别，说明鲁棒目标是可调的，但有限动作集合也带来结构性天花板。</figcaption></figure><figure class="figure"><img src="figures/partition-gate.svg" alt="分区异质性 gate"><figcaption>Macro gap 0.01392 超过预注册 0.01 阈值，触发 PR 注册。</figcaption></figure></div>
-  <blockquote>epsilon sweep 最有价值的地方，不是它制造了一个巨大的动作变化，而是它证明了“没有更多动作可以继续解决 p1”本身就是一个可观测的边界。</blockquote>
-</section>
-
-<section class="section" id="pr-result">
-  <div class="section-label">06 · 最终 matched 结果</div>
-  <h2>PR-PV-MFAPS 把两个分区的风险放进同一条可审计策略</h2>
-  <p>最终 clean run 把 PR-only 和 clean controls 分开存储，消除了内部 state 名称碰撞。冻结后共有 24 个独立 states，HELD 一次性读取 25,104 次，读取过程中没有错误。</p>
-  <div class="grid metrics">
-    <div class="card metric"><div class="value">0.4841</div><div class="label">PR HELD Macro-F1</div><div class="note">fixed-k: 0.4553</div></div>
-    <div class="card metric"><div class="value">0.2976</div><div class="label">PR HELD Tail-10%</div><div class="note">fixed-k: 0.2659</div></div>
-    <div class="card metric"><div class="value">0.9974×</div><div class="label">最大 wall ratio</div><div class="note">相对 fixed-k</div></div>
-    <div class="card metric"><div class="value">0.8889×</div><div class="label">最大 FLOPs ratio</div><div class="note">相对 fixed-k</div></div>
-  </div>
-  <p>相对 effective-number，PR 的 HELD Macro-F1 高 0.0080，Tail-10% 高 0.0198，但 wall ratio 为 1.0768，超过本轮 fixed-k 的 1.05× 预算线。因此这两个比较必须分开陈述：PR 相对 fixed-k 是成本受限的共同提升，相对 effective-number 是更高质量但略高成本的结果，不能把两者压成一个“全面胜出”。</p>
-  <div class="callout"><b>最终读法。</b> 这个结果支持“在当前 PlantSPD 配对分区和 fixed-k measured budget 下，分区鲁棒的反馈精度分配有效”。若使用 SOTA 一词，范围必须限定为“本次注册 PlantSPD 协议下的 measured Macro–Tail Pareto point”。HELD 逐样本预测没有被保存在最终汇总工件中，因此 McNemar 显著性仍未验证。</div>
-</section>
-
-<section class="section" id="system">
-  <div class="section-label">07 · 系统线</div>
-  <h2>Fused 不是算法增益的替代品，它解决的是同一个算法如何被真实执行</h2>
-  <p>早期 cost-aware PC-FA 的 FLOPs 看起来合规，却被 wall-clock 拖住。剖析后发现，重复 encoder forward、GPU/CPU 同步、reference probe 计费和 group 调度开销共同构成了实际瓶颈。Fused 路径只改执行图，不改动作序列和逻辑计数。</p>
-  <div class="grid three"><div class="card"><h3>融合轴</h3><div class="value large">3 → 1</div><p>Legacy 与 Fused 的动作序列和逻辑计数完全相同，物理 encoder forward 从 3 次降到 1 次。真实 checkpoint 等价性 smoke 的 CUDA 训练时间为 0.60204s → 0.15678s，即 3.84× 加速，state 最大绝对差为 (5.77\\times10^{-6})。</p></div><div class="card"><h3>分配轴</h3><div class="value large">0.80–0.89×</div><p>PR 与 fixed-k 的差异来自动作分配。PR 让一部分类别取 (k=0)，减少逻辑内循环成本，最终 matched FLOPs 比值区间为 0.80–0.89。</p></div><div class="card"><h3>两条证据不能混写</h3><p>融合轴证明执行图更紧，分配轴证明策略改变了计算预算。二者共同形成 co-design，但不能把融合加速写成算法 tail gain。</p></div></div>
-  <div class="math-block compact">\[
-  \mathrm{actions}_{legacy}=\mathrm{actions}_{fused},\qquad
-  \mathrm{counters}_{legacy}=\mathrm{counters}_{fused},\qquad
-  \max|\Delta\theta|=5.77\times10^{-6}<10^{-5}.
-  \]</div>
+<section class="section" id="fused">
+  <div class="section-label">算法与系统协同</div>
+  <h2>复杂的动作策略必须在物理执行上成立</h2>
+  <p>动态分配把类别动作、reference correction 和 group native pass 带进了 GPU。如果每个动作都重新触发 H2D、kernel launch 和 encoder forward，算法节省的 FLOPs 会被 wall-clock 开销抵消。Fused 路径将动作分组和梯度混合写进同一个 encoder graph，逻辑动作与物理执行被明确分开。</p>
   <div class="code-block"><pre><code>k_disc = np.asarray(policy["k_discrete"], dtype=int)
 alpha_disc = np.asarray(policy["alpha_discrete"], dtype=float)
-active_groups = build_action_groups(k_disc, alpha_disc, batch_labels)
+action_groups = build_action_groups(k_disc, alpha_disc, batch_labels)
 loss_native, loss_reference = fused_pcfa_gradient(
     model=model,
     head=head,
     batch=batch,
-    action_groups=active_groups,
+    action_groups=action_groups,
 )</code></pre></div>
-  <figure class="figure"><img src="figures/legacy-vs-fused.svg" alt="Legacy 与 Fused 执行对比"><figcaption>融合轴的 3.84× 来自真实 checkpoint 的 CUDA 等价性 smoke。分配轴的最大 FLOPs ratio 为 0.8889、平均 0.8593，最大 end-to-end wall ratio 为 1.0379、平均 0.9920。两组数字分别回答执行图和预算策略问题。</figcaption></figure>
+  <figure class="figure"><img src="figures/fused-co-design.svg" alt="Legacy 与 Fused 执行流"><figcaption>真实 checkpoint 等价性测试保持 action sequence、logical counters 和 state 数值一致。物理 encoder forward 从 3 次降到 1 次，CUDA event time 从 0.602 s 降到 0.157 s。</figcaption></figure>
+  <p>等价性 smoke 的最大 state absolute delta 为 (5.772919\times10^{-6})，注册容差为 (10^{-5})。在最终 matched run 中，最大 FLOPs ratio 为 0.8889，最大 end-to-end wall ratio 为 1.0379。系统优化的证据来自执行路径本身，算法收益仍由独立的 HELD 表格决定。</p>
 </section>
 
-<section class="section" id="evidence">
-  <div class="section-label">08 · 能说到哪里，必须停在哪里</div>
-  <h2>研究过程的最后一步，是把亮点和边界同时保留下来</h2>
-  <div class="grid three"><div class="card"><span class="tag done">EXECUTED</span><h3>已经执行</h3><p>A100 preflight、PR 数学 smoke、epsilon sweep、clean matched、FIT freeze、一次性 HELD、deterministic claims audit。</p></div><div class="card"><span class="tag open">REGISTERED_NOT_EXECUTED</span><h3>注册未执行</h3><p>CIFAR-LT、ImageNet-LT、learnable spectral geometry、第二个 SPD 项目、独立语义 reviewer。</p></div><div class="card"><span class="tag conditional">UNVERIFIED</span><h3>仍未验证</h3><p>community SOTA、跨任务泛化、universal improvement、alpha-aware optimality、robust-cost theorem。</p></div></div>
-  <blockquote>严谨不是把故事写小，而是让每一处亮点都知道自己的证据范围。一个系统优化结果可以很硬，但它不能替算法替换一条尚未执行的跨任务结论。</blockquote>
-  <h3>只保留三条深入阅读入口</h3>
-  <div class="doc-grid"><a class="doc-link" data-doc="docs/01-origin-and-feedback-geometry.md" data-title="反馈几何与机制实验" href="docs/01-origin-and-feedback-geometry.md"><b>机制与反馈几何</b><span>Loewner 差商、E0 / E1 / B3 / E2</span></a><a class="doc-link" data-doc="docs/03-pr-pv-mfaps-derivation.md" data-title="PR-PV-MFAPS 数学推导" href="docs/03-pr-pv-mfaps-derivation.md"><b>数学推导与离散求解</b><span>稳定性界、KL 对偶、Pareto DP</span></a><a class="doc-link" data-doc="docs/04-experiments-and-ablations.md" data-title="实验、消融与结果账本" href="docs/04-experiments-and-ablations.md"><b>实验与消融</b><span>转折分支、A100、epsilon sweep、最终 freeze</span></a></div>
-  <p class="small">完整证据清单仍保留在 <a href="docs/06-evidence-ledger.md" data-doc="docs/06-evidence-ledger.md" data-title="证据账本">证据账本</a>，它面向需要追溯原始工件的读者。</p>
+<section class="section" id="result">
+  <div class="section-label">Freeze 之后的唯一一次 HELD</div>
+  <h2>干净状态文件把最终比较固定在同一条证据链上</h2>
+  <p>在 A100 终链中，审计在 freeze 前识别到内部 state tag 的命名碰撞。相关 artifact 被物理隔离，随后采用独立目录重跑。最终保留 24 个带 SHA256 的状态文件，所有 FIT artifact 的 held_reads 均为 0，冻结后一次性读取 25,104 个 HELD 样本结果。</p>
+  <div class="table-wrap"><table><thead><tr><th>Method</th><th>HELD Macro-F1</th><th>HELD Tail-10%</th><th>Wall-clock</th><th>FLOPs</th></tr></thead><tbody>
+    <tr><td>fixed-k matched</td><td>0.4553</td><td>0.2659</td><td>0.663 s</td><td>(1.257\times10^{12})</td></tr>
+    <tr><td>effective-number</td><td>0.4760</td><td>0.2778</td><td>0.563 s</td><td>(1.077\times10^{12})</td></tr>
+    <tr><td><b>PR-PV-MFAPS</b></td><td><b>0.4841</b></td><td><b>0.2976</b></td><td>0.606 s</td><td>(1.077\times10^{12})</td></tr>
+  </tbody></table></div>
+  <figure class="figure"><img src="figures/pareto-frontier.svg" alt="HELD Macro-F1 与 Tail-10% 的测量前沿"><figcaption>点大小编码 wall-clock。PR-PV-MFAPS 位于本次 PlantSPD measured protocol 的右上边界。图中包含自行执行的 Balanced Softmax 插件结果与最终 PR 结果。</figcaption></figure>
+  <p>相对 fixed-k，PR-PV-MFAPS 的 Macro-F1 提升 0.0288，Tail-10% 提升 0.0317，最大 wall ratio 为 0.9974，最大 FLOPs ratio 为 0.8889。相对 effective-number，Macro-F1 提升 0.0080，Tail-10% 提升 0.0198，wall ratio 为 1.0768。两个比较回答的是不同问题，因此分别报告。</p>
+  <div class="callout"><b>可使用的准确表述。</b> PR-PV-MFAPS 在本次注册的 PlantSPD matched protocol 内建立了新的 measured Macro–Tail Pareto point。CIFAR-LT、ImageNet-LT、可学习谱函数和第二个 SPD 项目仍属于注册未执行，逐样本 McNemar 显著性也等待当前检验产物。</div>
 </section>
 
-<footer class="footer">资料来源包含 PlantSPD 研究记录、PlantGPU 远程代码镜像、A100/3090 实验工件与 PR-PV-MFAPS 最终 claims-evidence 文件。页面是面向读者的研究复盘，原始 manifest、冻结清单和代码仍以仓库中的文件为准。</footer>
+<section class="section" id="record">
+  <div class="section-label">研究记录</div>
+  <h2>实验状态和深入阅读</h2>
+  <div class="grid three"><div class="card"><span class="tag done">EXECUTED</span><h3>已执行</h3><p>机制诊断、3090 pivot、A100 preflight、Balanced Softmax 插件、epsilon sweep、Fused 等价性、PR matched、freeze、一次性 HELD。</p></div><div class="card"><span class="tag open">REGISTERED_NOT_EXECUTED</span><h3>注册未执行</h3><p>CIFAR-LT、ImageNet-LT、learnable spectral geometry、第二个 SPD 项目、独立 semantic review。</p></div><div class="card"><span class="tag conditional">UNVERIFIED</span><h3>待当前检验</h3><p>逐样本 McNemar、跨任务泛化、community SOTA、alpha-aware optimality 和 robust-cost theorem。</p></div></div>
+  <div class="doc-grid"><a class="doc-link" data-doc="docs/01-origin-and-feedback-geometry.md" data-title="反馈几何与机制推导" href="docs/01-origin-and-feedback-geometry.md"><b>反馈几何与机制推导</b><span>读出梯度、Loewner 差商、E0 / E1 / B3 / E2</span></a><a class="doc-link" data-doc="docs/03-pr-pv-mfaps-derivation.md" data-title="PR-PV-MFAPS 数学推导" href="docs/03-pr-pv-mfaps-derivation.md"><b>PR-PV-MFAPS 数学推导</b><span>稳定性界、KL 对偶、Pareto DP、量化误差</span></a><a class="doc-link" data-doc="docs/04-experiments-and-ablations.md" data-title="实验和消融记录" href="docs/04-experiments-and-ablations.md"><b>实验和消融记录</b><span>插件表、A100、freeze、HELD 与状态分类</span></a></div>
+  <p class="small">完整的工件索引仍保留在 <a href="docs/06-evidence-ledger.md" data-doc="docs/06-evidence-ledger.md" data-title="证据账本">证据账本</a> 中。</p>
+</section>
+
+<footer class="footer">页面记录的是从病害检测工程到反馈几何、长尾分配和系统协同的完整研究过程。数学公式、实验表格与图像均来自仓库内的研究记录和自行执行的工件。</footer>
 </main>
 </div>
 <div id="viewer" class="viewer"><div class="viewer-backdrop"></div><div class="viewer-panel"><div class="viewer-head"><h2>深入阅读</h2><button id="closeViewer">关闭</button></div><div class="viewer-source"></div><div class="viewer-content"></div></div></div>
