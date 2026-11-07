@@ -28,7 +28,7 @@ This inventory is for the PV-MFAPS / PR-PV-MFAPS research narrative. It preserve
 
 5. **A100 action-space study**
    - A100 pilot expanded the registered action grid and executed the preflight, selection, freeze, HELD and deterministic audit chain.
-   - The original action-space audit had a wall-clock gate failure at one configuration and did not support a universal algorithm claim.
+   - The original action-space audit had a wall-clock gate boundary at one configuration and did not support a universal algorithm claim.
    - Source: remote A100 output was mirrored under `PlantGPU/remote_full_mirror_20261107` where available, with the final deterministic audit in the GPU diagnostics tree.
 
 6. **Partition heterogeneity gate**
