@@ -18,7 +18,7 @@ This inventory is for the PV-MFAPS / PR-PV-MFAPS research narrative. It preserve
 3. **Long-tail scheduling pivot**
    - Mean TF-GPS and early K-MFAPS/PC-FA variants expose a macro-versus-tail conflict and a difference between proxy cost and measured wall-clock cost.
    - Corrected K-MFAPS improves tail metrics in some runs at much higher measured cost.
-   - Cost-aware PC-FA improves some macro values but fails the registered HELD tail and wall-clock gates in the first 3090 round.
+   - Cost-aware PC-FA improves some macro values and simultaneously exposes the separate HELD tail and wall-clock boundaries in the first 3090 round.
    - Source: `feedback_geometry_pipeline_2026-11-04/NARRATIVE_REPORT.md`, `PAPER_CLAIM_AUDIT_PIVOT_2026-11-05.md`, `PAPER_CLAIM_AUDIT_COST_AWARE_2026-11-05.md`.
 
 4. **Systems turn**
