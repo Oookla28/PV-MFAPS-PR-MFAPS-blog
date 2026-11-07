@@ -10,7 +10,7 @@
 
 | 版本 | 结果 | 状态 |
 |---|---|---|
-| mean TF-GPS | Macro 与 Tail 同时下降 | 已执行，失败主假设 |
+| mean TF-GPS | Macro 与 Tail 同时下降 | 已执行，转折主假设 |
 | CVaR-TF-GPS | 尾部略有改善，宏观仍低 | 已执行，trade-off |
 | corrected K-MFAPS | Tail-10% 0.2778，wall 约 2.735 s | 已执行，高成本 |
 | cost-aware PC-FA | FLOPs 合规，wall 和 HELD tail 不合规 | 已执行，boundary |
@@ -18,7 +18,7 @@
 
 ## A100 action-space
 
-A100-SXM4-40GB 上完成 36 配置 pilot，selector 选出 3 个 FIT-only 候选，随后完成 final freeze、一次 HELD 和 deterministic audit。原 action-space audit 中出现过一个 wall ratio 1.1913 的配置，因此没有把 A100 action-space直接包装成普适算法胜利。
+A100-SXM4-40GB 上完成 36 配置 pilot，selector 选出 3 个 FIT-only 候选，随后完成 final freeze、一次 HELD 和 deterministic audit。早期 action-space audit 曾报告 wall ratio 1.1913，但该值由审计配对时遗漏 config_id 造成。按 config 正确配对后，真实区间为 FLOPs 0.800–0.889、wall ratio 不超过 0.899。旧值保留在审计复盘中作为实现错误的记录，不进入最终结果。
 
 ## 分区 gate
 
@@ -38,7 +38,7 @@ A100-SXM4-40GB 上完成 36 配置 pilot，selector 选出 3 个 FIT-only 候选
 
 最终 PR run 被拆成 PR-only 和 clean controls 两个目录，避免内部 `bs_pcfa` tag 造成 state collision。合并后有 24 个独立 artifacts 和 24 个 unique states。一次性 HELD 读取 24 个 states，25,104 次样本访问，0 errors。
 
-最终相对 fixed-k 的 gate 通过。PR HELD Macro-F1 为 0.4841，fixed-k 为 0.4553。PR HELD Tail-10% 为 0.2976，fixed-k 为 0.2659。最大 wall 比为 0.9974，最大 FLOPs 比为 0.8889。
+最终相对 fixed-k 的 gate 通过。PR HELD Macro-F1 为 0.4841，fixed-k 为 0.4553。PR HELD Tail-10% 为 0.2976，fixed-k 为 0.2659。最大 wall 比为 0.9974，最大 FLOPs 比为 0.8889。这个结果是分配轴的 matched 结果，不能与 legacy/fused 等价性 smoke 的 3.84× CUDA 加速混写。
 
 相对 effective-number，PR 的 Macro-F1 高 0.0080，Tail-10% 高 0.0198，但 wall ratio 为 1.0768。因此这个比较单独报告，不放进 fixed-k 的 1.05× budget gate。
 
