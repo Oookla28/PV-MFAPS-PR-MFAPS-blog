@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 480" role="img">
+<style>text{font-family:"Songti SC","STSong","SimSun",serif} .axis{stroke:#6d6962;stroke-width:1} .grid{stroke:#e6dfd4;stroke-width:1} .label{fill:#4b4742;font-size:14px} .small{fill:#766f66;font-size:12px} .title{fill:#292621;font-size:22px;font-weight:600} </style>
+<text class="title" x="72" y="40">Partition gate: why PR was registered</text>
+<text class="label" x="72" y="120">Macro gap</text><rect x="220" y="100" width="310" height="28" rx="7" fill="#eee8df"/><rect x="220" y="100" width="310.0" height="28" rx="7" fill="#3d8967"/><line x1="442.7" y1="92" x2="442.7" y2="138" stroke="#3e3933" stroke-dasharray="5 4"/><text class="small" x="555" y="124">0.0139 · threshold 0.01</text>
+<text class="label" x="72" y="225">Tail gap</text><rect x="220" y="205" width="310" height="28" rx="7" fill="#eee8df"/><rect x="220" y="205" width="45.1" height="28" rx="7" fill="#a76c4f"/><line x1="530.0" y1="197" x2="530.0" y2="243" stroke="#3e3933" stroke-dasharray="5 4"/><text class="small" x="555" y="229">0.0029 · threshold 0.02</text>
+<text class="label" x="72" y="330">Action TV</text><rect x="220" y="310" width="310" height="28" rx="7" fill="#eee8df"/><rect x="220" y="310" width="89.9" height="28" rx="7" fill="#8a6f9d"/><line x1="530.0" y1="302" x2="530.0" y2="348" stroke="#3e3933" stroke-dasharray="5 4"/><text class="small" x="555" y="334">0.0290 · threshold 0.10</text>
+<text class="small" x="72" y="445">只有 Macro gap 触发了注册。Tail gap 与 action TV 没有超过各自阈值。</text>
+</svg>
