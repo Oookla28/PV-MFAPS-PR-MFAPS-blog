@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 520" role="img">
+<style>text{font-family:"Songti SC","STSong","SimSun",serif} .axis{stroke:#6d6962;stroke-width:1} .grid{stroke:#e6dfd4;stroke-width:1} .label{fill:#4b4742;font-size:14px} .small{fill:#766f66;font-size:12px} .title{fill:#292621;font-size:22px;font-weight:600} </style>
+<text class="title" x="70" y="42">The research moved by failed hypotheses</text>
+<line x1="100" y1="230" x2="950" y2="230" stroke="#b8ad9f" stroke-width="5"/>
+<circle cx="100" cy="230" r="18" fill="#5b7fa3"/><text x="100" y="285" text-anchor="middle" class="label">PlantSPD</text><text x="100" y="310" text-anchor="middle" class="small">Raw / Log readout gap</text>
+<circle cx="270" cy="230" r="18" fill="#6f5d87"/><text x="270" y="285" text-anchor="middle" class="label">E0–E2</text><text x="270" y="310" text-anchor="middle" class="small">feedback mismatch diagnostics</text>
+<circle cx="440" cy="230" r="18" fill="#a76c4f"/><text x="440" y="285" text-anchor="middle" class="label">3090</text><text x="440" y="310" text-anchor="middle" class="small">long-tail pivot and failed cost gate</text>
+<circle cx="610" cy="230" r="18" fill="#3d8967"/><text x="610" y="285" text-anchor="middle" class="label">A100</text><text x="610" y="310" text-anchor="middle" class="small">action space + fused execution</text>
+<circle cx="780" cy="230" r="18" fill="#b85c38"/><text x="780" y="285" text-anchor="middle" class="label">PR</text><text x="780" y="310" text-anchor="middle" class="small">KL robust shared policy</text>
+<circle cx="950" cy="230" r="18" fill="#3b8e68"/><text x="950" y="285" text-anchor="middle" class="label">HELD</text><text x="950" y="310" text-anchor="middle" class="small">24 states / 25,104 reads</text>
+<text class="small" x="70" y="440">每一次加法都来自一次对先前假设的拆分。失败实验保留在时间线上，但不进入最终均值。</text>
+</svg>
