@@ -1,0 +1,16 @@
+{
+  "dataset": {"classes": 69, "fit": 4184, "held": 1046, "count_min": 5, "count_max": 344, "head_tail_ratio": 68.8, "partitions": ["p0", "p1"], "paired_counts": true},
+  "pr_final": {
+    "arms": [
+      {"name": "bs_fixed_k_matched_B02", "n": 6, "fit_macro": 0.9458907325, "fit_tail10": 0.9428880643, "held_macro": 0.4552862042, "held_tail10": 0.2658730159, "wall": 0.6625926726, "flops": 1256675606528},
+      {"name": "effective_number", "n": 6, "fit_macro": 0.9668374453, "fit_tail10": 0.9665429808, "held_macro": 0.4760288082, "held_tail10": 0.2777777778, "wall": 0.5627661803, "flops": 1077135015936},
+      {"name": "pr_pv_mfaps", "n": 6, "fit_macro": 0.9703286602, "fit_tail10": 0.9655225727, "held_macro": 0.4840633465, "held_tail10": 0.2976190476, "wall": 0.6059941116, "flops": 1077142364160}
+    ],
+    "deltas_vs_fixed": {"held_macro": 0.0287771423, "held_tail10": 0.0317460317, "max_wall_ratio": 0.9974137014, "mean_wall_ratio": 0.9151738193, "max_flops_ratio": 0.8888894331, "mean_flops_ratio": 0.8592531290},
+    "deltas_vs_effective": {"held_macro": 0.0080345383, "held_tail10": 0.0198412698, "wall_ratio": 1.0768133069, "flops_ratio": 1.0000068220}
+  },
+  "partition_gate": {"macro_gap": 0.0139206464, "tail_gap": 0.0029066172, "action_tv": 0.0289855072, "thresholds": {"macro": 0.01, "tail": 0.02, "action_tv": 0.1}, "decision": "REGISTER_PR_PV_MFAPS", "held_reads": 0},
+  "epsilon_sweep": {"n_values": 11, "distinct_action_vectors": 5, "selected": 0.01, "changed_classes_vs_0_1": 2, "changed_class_ids": [38, 68], "paired_counts": true},
+  "system": {"legacy_forwards": 3, "fused_forwards": 1, "max_state_abs_delta": 0.000004158006, "state_tolerance": 0.00001, "max_wall_ratio": 1.0379, "mean_wall_ratio": 0.992, "max_flops_ratio": 0.8889, "mean_flops_ratio": 0.8593},
+  "status": {"executed": ["A100 preflight", "PR math smoke", "epsilon sweep", "PR matched", "freeze", "one-time HELD", "claims audit"], "registered_not_executed": ["CIFAR-LT", "ImageNet-LT", "learnable spectral geometry", "second SPD feedback-transfer", "semantic review"], "unverified": ["SOTA", "generalisation", "universal improvement", "alpha-aware optimality", "robust-cost theorem"]}
+}
