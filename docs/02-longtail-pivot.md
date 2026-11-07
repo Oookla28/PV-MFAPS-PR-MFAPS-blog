@@ -13,7 +13,7 @@ mean TF-GPS 在 FIT 与 HELD 上都下降，说明把所有类别的反馈风险
 | corrected K-MFAPS | 0.4615 | 0.2778 | tail trade-off，成本很高 |
 | cost-aware PC-FA | 0.4680 | 0.2381 | FIT tail 没有在 HELD 复现 |
 
-> 这次失败不是一个超参数的问题。代理预算、真实 wall-clock 和外推风险被混成一个标量，才是更深的错误。
+> 这次转折说明问题不在一个超参数。代理预算、真实 wall-clock 和外推风险被混成一个标量，才是更深的错误。
 
 ## 2. 有限动作风险
 
