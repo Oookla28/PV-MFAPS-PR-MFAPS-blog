@@ -31,7 +31,7 @@ window.MathJax={tex:{inlineMath:[['\\(','\\)'],['$','$']],displayMath:[['\\[','\
 </aside>
 <main class="main">
 <section class="hero" id="thesis">
-  <div class="kicker">一份从 PlantSPD 出发、经过失败与系统重写后留下的研究记录</div>
+  <div class="kicker">一份从 PlantSPD 出发、经过层层转折与系统重写后留下的研究记录</div>
   <h1>从反馈失配到分区鲁棒内循环分配</h1>
   <p class="hero-subtitle">PlantSPD 长尾训练中，读出几何如何改变编码器的学习反馈</p>
   <p class="lead">最初的问题看起来像一个熟悉的表示比较：Raw、矩阵 Log，究竟哪一种 SPD 几何更适合植物病害识别？真正的转折发生在固定特征读出已经接近完美，而联合训练仍然走向不同轨迹之后。研究由此从“比较几何”转向“测量反馈”，再转向“为反馈分配内循环精度”，最后进入分区异质性和真实 GPU 执行图。</p>
@@ -48,7 +48,7 @@ window.MathJax={tex:{inlineMath:[['\\(','\\)'],['$','$']],displayMath:[['\\[','\
     <article class="card highlight"><span class="number">03</span><h3>系统</h3><p>Fused 路径把逻辑上的多次 native/reference 计算合并到一次物理 encoder forward。动作序列不变，真实 wall-clock 和 FLOPs 才能被公平比较。</p></article>
   </div>
   <blockquote>真正被研究的对象不是一个“更强的头”，而是一个近似读出如何改变编码器下一步会看到的世界。</blockquote>
-  <div class="callout"><b>结果边界。</b> PR-PV-MFAPS 在本次 PlantSPD matched 协议中相对 fixed-k 同时提高 HELD Macro-F1 与 Tail-10%，并满足本轮 fixed-k 的成本门槛。这个结果属于当前数据、划分、动作集和预算合同，不能替换成社区 SOTA、跨任务泛化或普适改进。</div>
+  <div class="callout"><b>如何准确描述这组结果。</b> 在本次注册的 PlantSPD matched protocol 内，PR-PV-MFAPS 相对 fixed-k 同时提高 HELD Macro-F1 与 Tail-10%，并满足 measured fixed-k 的成本门槛。相对 effective-number，它在相同 FLOPs 下给出更高的两项指标，但 wall-clock 略高。因此可以称为本协议内的 measured Pareto point，不能写成社区通用 SOTA、跨任务泛化或普适改进。</div>
 </section>
 
 <section class="section" id="origin">
@@ -133,6 +133,7 @@ window.MathJax={tex:{inlineMath:[['\\(','\\)'],['$','$']],displayMath:[['\\[','\
   <div class="math-block">\[
   R_c(k)=A_c\rho_c^{2k}+s_c(k)+\beta_c(k)+e_c(\delta).
   \]</div>
+  <figure class="figure"><img src="figures/bias-variance-envelope.svg" alt="偏差停滞与稳定性包络"><figcaption>在观测到的中位收缩率 \(\rho\approx0.999873\) 下，\(k=16\) 的偏差项只下降约 0.41%，而显式的 \(1.01^k\) 统计代理上升约 17.3%。这张图解释了为什么大动作集会倾向于选择小 \(k\)，但它是注册风险代理的结构分析，不是总体泛化定理。</figcaption></figure>
   <p>第一项是读出误差的收缩包络。(s_c(k)) 记录有限批次统计，(eta_c(k)) 是在明确假设下的算法稳定性项，(e_c(delta)) 是置信半径。关键是把它们的来源分开，避免把经验曲线包装成普适定理。</p>
   <h3>稳定性项怎样推出来</h3>
   <p>假设类别读出目标是 (lambda)-strongly convex 且 (L)-smooth，内循环使用步长 (etale 1/L)。梯度下降的轨迹收缩率写作</p>
@@ -181,10 +182,10 @@ window.MathJax={tex:{inlineMath:[['\\(','\\)'],['$','$']],displayMath:[['\\[','\
 
 <section class="section" id="experiments">
   <div class="section-label">05 · 实验与反转</div>
-  <h2>每次失败都删掉一个过于简单的解释</h2>
+  <h2>每次转折都删掉一个过于简单的解释</h2>
   <p>第一轮 3090 结果把 Macro-F1、Tail-10% 和算力预算之间的冲突暴露出来。它没有直接给出最终方案，却告诉我们哪些路线不能再用。</p>
   <div class="grid four compact-grid">
-    <div class="card"><span class="tag open">失败</span><h3>mean TF-GPS</h3><p>FIT 和 HELD 同时下降。类均值调度把尾部估计噪声带入了全局反馈。</p></div>
+    <div class="card"><span class="tag open">转折</span><h3>mean TF-GPS</h3><p>FIT 和 HELD 同时下降。类均值调度把尾部估计噪声带入了全局反馈。</p></div>
     <div class="card"><span class="tag conditional">折中</span><h3>CVaR-TF-GPS</h3><p>尾部有所改善，但 HELD Macro-F1 仍低于 effective-number。</p></div>
     <div class="card"><span class="tag conditional">高成本</span><h3>corrected K-MFAPS</h3><p>HELD Tail-10% 达到 0.2778，但实际成本约 (2.154\times10^{12}) FLOPs。</p></div>
     <div class="card"><span class="tag open">边界</span><h3>cost-aware PC-FA</h3><p>FLOPs 合规，wall-clock 和 HELD tail gate 没有同时通过。</p></div>
@@ -214,17 +215,19 @@ window.MathJax={tex:{inlineMath:[['\\(','\\)'],['$','$']],displayMath:[['\\[','\
     <div class="card metric"><div class="value">0.8889×</div><div class="label">最大 FLOPs ratio</div><div class="note">相对 fixed-k</div></div>
   </div>
   <p>相对 effective-number，PR 的 HELD Macro-F1 高 0.0080，Tail-10% 高 0.0198，但 wall ratio 为 1.0768，超过本轮 fixed-k 的 1.05× 预算线。因此这两个比较必须分开陈述：PR 相对 fixed-k 是成本受限的共同提升，相对 effective-number 是更高质量但略高成本的结果，不能把两者压成一个“全面胜出”。</p>
-  <div class="callout"><b>最终读法。</b> 这个结果支持“在当前 PlantSPD 配对分区和 fixed-k measured budget 下，分区鲁棒的反馈精度分配有效”。它不支持 community SOTA、跨域泛化、普适长尾改进或 alpha-aware 全局最优。</div>
+  <div class="callout"><b>最终读法。</b> 这个结果支持“在当前 PlantSPD 配对分区和 fixed-k measured budget 下，分区鲁棒的反馈精度分配有效”。若使用 SOTA 一词，范围必须限定为“本次注册 PlantSPD 协议下的 measured Macro–Tail Pareto point”。HELD 逐样本预测没有被保存在最终汇总工件中，因此 McNemar 显著性仍未验证。</div>
 </section>
 
 <section class="section" id="system">
   <div class="section-label">07 · 系统线</div>
   <h2>Fused 不是算法增益的替代品，它解决的是同一个算法如何被真实执行</h2>
   <p>早期 cost-aware PC-FA 的 FLOPs 看起来合规，却被 wall-clock 拖住。剖析后发现，重复 encoder forward、GPU/CPU 同步、reference probe 计费和 group 调度开销共同构成了实际瓶颈。Fused 路径只改执行图，不改动作序列和逻辑计数。</p>
-  <div class="grid two"><div class="card"><h3>等价性 gate</h3><div class="math-block compact">\[
+  <div class="grid three"><div class="card"><h3>融合轴</h3><div class="value large">3 → 1</div><p>Legacy 与 Fused 的动作序列和逻辑计数完全相同，物理 encoder forward 从 3 次降到 1 次。真实 checkpoint 等价性 smoke 的 CUDA 训练时间为 0.60204s → 0.15678s，即 3.84× 加速，state 最大绝对差为 (5.77\\times10^{-6})。</p></div><div class="card"><h3>分配轴</h3><div class="value large">0.80–0.89×</div><p>PR 与 fixed-k 的差异来自动作分配。PR 让一部分类别取 (k=0)，减少逻辑内循环成本，最终 matched FLOPs 比值区间为 0.80–0.89。</p></div><div class="card"><h3>两条证据不能混写</h3><p>融合轴证明执行图更紧，分配轴证明策略改变了计算预算。二者共同形成 co-design，但不能把融合加速写成算法 tail gain。</p></div></div>
+  <div class="math-block compact">\[
   \mathrm{actions}_{legacy}=\mathrm{actions}_{fused},\qquad
-  \mathrm{counters}_{legacy}=\mathrm{counters}_{fused}.
-  \]</div><p>真实 checkpoint 一步配对的 encoder state 最大绝对差为 (4.158006\times10^{-6})，低于 (10^{-5}) 容差。</p></div><div class="card"><h3>物理执行变化</h3><div class="value large">3 → 1</div><p>逻辑上仍有多次 native/reference pass，但重复的 encoder work 被融合。8 个训练步只执行 8 个物理 encoder forward。</p></div></div>
+  \mathrm{counters}_{legacy}=\mathrm{counters}_{fused},\qquad
+  \max|\Delta\theta|=5.77\times10^{-6}<10^{-5}.
+  \]</div>
   <div class="code-block"><pre><code>k_disc = np.asarray(policy["k_discrete"], dtype=int)
 alpha_disc = np.asarray(policy["alpha_discrete"], dtype=float)
 active_groups = build_action_groups(k_disc, alpha_disc, batch_labels)
@@ -234,7 +237,7 @@ loss_native, loss_reference = fused_pcfa_gradient(
     batch=batch,
     action_groups=active_groups,
 )</code></pre></div>
-  <figure class="figure"><img src="figures/legacy-vs-fused.svg" alt="Legacy 与 Fused 执行对比"><figcaption>等价性 smoke 的单步 CUDA 时间为 0.60204s → 0.15678s。最终 matched 运行中，分配轴的最大 FLOPs ratio 为 0.8889、平均 0.8593，最大 end-to-end wall ratio 为 1.0379、平均 0.9920。两组数字分别回答“融合是否减少重复执行”和“策略是否满足预算”，不能合并成一个加速率。</figcaption></figure>
+  <figure class="figure"><img src="figures/legacy-vs-fused.svg" alt="Legacy 与 Fused 执行对比"><figcaption>融合轴的 3.84× 来自真实 checkpoint 的 CUDA 等价性 smoke。分配轴的最大 FLOPs ratio 为 0.8889、平均 0.8593，最大 end-to-end wall ratio 为 1.0379、平均 0.9920。两组数字分别回答执行图和预算策略问题。</figcaption></figure>
 </section>
 
 <section class="section" id="evidence">
@@ -243,7 +246,7 @@ loss_native, loss_reference = fused_pcfa_gradient(
   <div class="grid three"><div class="card"><span class="tag done">EXECUTED</span><h3>已经执行</h3><p>A100 preflight、PR 数学 smoke、epsilon sweep、clean matched、FIT freeze、一次性 HELD、deterministic claims audit。</p></div><div class="card"><span class="tag open">REGISTERED_NOT_EXECUTED</span><h3>注册未执行</h3><p>CIFAR-LT、ImageNet-LT、learnable spectral geometry、第二个 SPD 项目、独立语义 reviewer。</p></div><div class="card"><span class="tag conditional">UNVERIFIED</span><h3>仍未验证</h3><p>community SOTA、跨任务泛化、universal improvement、alpha-aware optimality、robust-cost theorem。</p></div></div>
   <blockquote>严谨不是把故事写小，而是让每一处亮点都知道自己的证据范围。一个系统优化结果可以很硬，但它不能替算法替换一条尚未执行的跨任务结论。</blockquote>
   <h3>只保留三条深入阅读入口</h3>
-  <div class="doc-grid"><a class="doc-link" data-doc="docs/01-origin-and-feedback-geometry.md" data-title="反馈几何与机制实验" href="docs/01-origin-and-feedback-geometry.md"><b>机制与反馈几何</b><span>Loewner 差商、E0 / E1 / B3 / E2</span></a><a class="doc-link" data-doc="docs/03-pr-pv-mfaps-derivation.md" data-title="PR-PV-MFAPS 数学推导" href="docs/03-pr-pv-mfaps-derivation.md"><b>数学推导与离散求解</b><span>稳定性界、KL 对偶、Pareto DP</span></a><a class="doc-link" data-doc="docs/04-experiments-and-ablations.md" data-title="实验、消融与结果账本" href="docs/04-experiments-and-ablations.md"><b>实验与消融</b><span>失败分支、A100、epsilon sweep、最终 freeze</span></a></div>
+  <div class="doc-grid"><a class="doc-link" data-doc="docs/01-origin-and-feedback-geometry.md" data-title="反馈几何与机制实验" href="docs/01-origin-and-feedback-geometry.md"><b>机制与反馈几何</b><span>Loewner 差商、E0 / E1 / B3 / E2</span></a><a class="doc-link" data-doc="docs/03-pr-pv-mfaps-derivation.md" data-title="PR-PV-MFAPS 数学推导" href="docs/03-pr-pv-mfaps-derivation.md"><b>数学推导与离散求解</b><span>稳定性界、KL 对偶、Pareto DP</span></a><a class="doc-link" data-doc="docs/04-experiments-and-ablations.md" data-title="实验、消融与结果账本" href="docs/04-experiments-and-ablations.md"><b>实验与消融</b><span>转折分支、A100、epsilon sweep、最终 freeze</span></a></div>
   <p class="small">完整证据清单仍保留在 <a href="docs/06-evidence-ledger.md" data-doc="docs/06-evidence-ledger.md" data-title="证据账本">证据账本</a>，它面向需要追溯原始工件的读者。</p>
 </section>
 
