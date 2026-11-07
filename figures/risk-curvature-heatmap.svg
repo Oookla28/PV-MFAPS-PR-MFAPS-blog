@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 460" role="img">
+<style>text{font-family:"Songti SC","STSong","SimSun",serif}.title{fill:#2b2824;font-size:25px;font-weight:600}.axis{stroke:#70675d;stroke-width:1}.grid{stroke:#e5ddd1;stroke-width:1}.label{fill:#4b4540;font-size:15px}.small{fill:#766d63;font-size:13px}.legend{fill:#4b4540;font-size:14px}</style>
+<text class="title" x="70" y="43">边界类别的分区风险热力图</text>
+<text class="label" x="285.0" y="82" text-anchor="middle">k=0</text>
+<text class="label" x="405.0" y="82" text-anchor="middle">k=1</text>
+<text class="label" x="525.0" y="82" text-anchor="middle">k=2</text>
+<text class="label" x="645.0" y="82" text-anchor="middle">k=4</text>
+<text class="label" x="207" y="143" text-anchor="end">38 p0</text>
+<rect x="225" y="105" width="115" height="57" rx="5" fill="rgb(235,226,211)"/><text x="283.0" y="140" text-anchor="middle" fill="#2b2824" font-size="14">61.58</text>
+<rect x="345" y="105" width="115" height="57" rx="5" fill="rgb(235,226,211)"/><text x="403.0" y="140" text-anchor="middle" fill="#2b2824" font-size="14">61.76</text>
+<rect x="465" y="105" width="115" height="57" rx="5" fill="rgb(235,226,211)"/><text x="523.0" y="140" text-anchor="middle" fill="#2b2824" font-size="14">61.94</text>
+<rect x="585" y="105" width="115" height="57" rx="5" fill="rgb(235,226,210)"/><text x="643.0" y="140" text-anchor="middle" fill="#2b2824" font-size="14">62.30</text>
+<text class="label" x="207" y="205" text-anchor="end">38 p1</text>
+<rect x="225" y="167" width="115" height="57" rx="5" fill="rgb(244,238,224)"/><text x="283.0" y="202" text-anchor="middle" fill="#2b2824" font-size="14">14.20</text>
+<rect x="345" y="167" width="115" height="57" rx="5" fill="rgb(244,238,224)"/><text x="403.0" y="202" text-anchor="middle" fill="#2b2824" font-size="14">14.11</text>
+<rect x="465" y="167" width="115" height="57" rx="5" fill="rgb(244,238,224)"/><text x="523.0" y="202" text-anchor="middle" fill="#2b2824" font-size="14">14.02</text>
+<rect x="585" y="167" width="115" height="57" rx="5" fill="rgb(245,239,225)"/><text x="643.0" y="202" text-anchor="middle" fill="#2b2824" font-size="14">13.86</text>
+<text class="label" x="207" y="267" text-anchor="end">68 p0</text>
+<rect x="225" y="229" width="115" height="57" rx="5" fill="rgb(155,119,95)"/><text x="283.0" y="264" text-anchor="middle" fill="#2b2824" font-size="14">461.70</text>
+<rect x="345" y="229" width="115" height="57" rx="5" fill="rgb(155,119,95)"/><text x="403.0" y="264" text-anchor="middle" fill="#2b2824" font-size="14">461.58</text>
+<rect x="465" y="229" width="115" height="57" rx="5" fill="rgb(155,119,95)"/><text x="523.0" y="264" text-anchor="middle" fill="#2b2824" font-size="14">461.74</text>
+<rect x="585" y="229" width="115" height="57" rx="5" fill="rgb(155,119,95)"/><text x="643.0" y="264" text-anchor="middle" fill="#2b2824" font-size="14">462.50</text>
+<text class="label" x="207" y="329" text-anchor="end">68 p1</text>
+<rect x="225" y="291" width="115" height="57" rx="5" fill="rgb(197,175,155)"/><text x="283.0" y="326" text-anchor="middle" fill="#2b2824" font-size="14">252.22</text>
+<rect x="345" y="291" width="115" height="57" rx="5" fill="rgb(197,175,155)"/><text x="403.0" y="326" text-anchor="middle" fill="#2b2824" font-size="14">252.30</text>
+<rect x="465" y="291" width="115" height="57" rx="5" fill="rgb(197,175,155)"/><text x="523.0" y="326" text-anchor="middle" fill="#2b2824" font-size="14">252.47</text>
+<rect x="585" y="291" width="115" height="57" rx="5" fill="rgb(197,175,155)"/><text x="643.0" y="326" text-anchor="middle" fill="#2b2824" font-size="14">253.00</text>
+<text class="small" x="70" y="410">颜色越深表示风险代理越高。Class 38 的 k=2 与 Class 68 的 k=1 分别由 p0 风险面主导。</text>
+</svg>
