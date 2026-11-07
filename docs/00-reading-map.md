@@ -2,7 +2,7 @@
 
 ## 页面定位
 
-这不是实验报告，也不把过程写成方法说明书。叙事从一个具体的长尾训练矛盾开始。读者先看到模型为什么“读得出来却学不对”，再看到几轮方法如何因为错误的目标、预算和实现而失败，最后进入 PV-MFAPS 的风险包络、离散分配和 PR-PV-MFAPS 的分区鲁棒版本。
+这不是实验报告，也不把过程写成方法说明书。叙事从一个具体的长尾训练矛盾开始。读者先看到模型为什么“读得出来却学不对”，再看到几轮方法如何因为目标、预算和实现仍未对齐而不断收紧，最后进入 PV-MFAPS 的风险包络、离散分配和 PR-PV-MFAPS 的分区鲁棒版本。
 
 全页使用宋体系字体。主页面适合电脑端纵向阅读，侧栏在手机端变成横向可滚动导航。数学使用 MathJax，长公式放在可横向滚动的公式卡片中。每个深层主题可以从主页面跳转到一个独立 Markdown 阅读页，阅读页用同一套 Markdown renderer 解析标题、表格、代码、blockquote、LaTeX 和锚点，返回按钮回到主页面原位置。
 
@@ -28,7 +28,7 @@
 1. 起点：为什么一个分类头会改变研究结论
 2. 数据：长尾和配对分区
 3. 机制：前向可读出不等于反馈可用
-4. 第一轮失败：mean、CVaR 和无约束极小极大
+4. 第一轮转折：mean、CVaR 和无约束极小极大
 5. PV-MFAPS：风险包络与有限动作 DP
 6. 系统优化：为什么 fused 路径必须单独证明
 7. A100：动作空间、预算和 epsilon sweep
@@ -99,9 +99,9 @@ D\phi_C[H]=U\bigl(G_\phi(\Lambda)\odot(U^THU)\bigr)U^T
 - Raw/Log 的 Loewner 差商热图
 - `kappa` 与频率、loss、gradient norm 的偏相关散点图
 
-## 4. 第一轮失败
+## 4. 第一轮转折
 
-把失败写成剧情转折，而不是结果表堆积。
+把这一轮写成剧情转折，而不是结果表堆积。
 
 建议并列四张卡。
 
@@ -245,18 +245,18 @@ Blockquote：
 - no independent semantic review
 - no community SOTA statement
 
-## 10. 失败、修复与可复现
+## 10. 转折、修正与可复现
 
-把错误写成研究过程中的“悬念”但不要让审计压过主线。
+把每个边界写成研究过程中的“悬念”，但不要让证据边界压过主线。
 
 可展开 details。
 
 - eps=0.1 smoke 被 eps=0.01 policy selection 替换
 - PR/BS internal arm state collision，18 artifacts 版本隔离
-- first HELD path failure，held_reads remained 0
+- first HELD path boundary，held_reads remained 0
 - final clean PR/control split rerun
 
-每个失败卡片要显示 `INVALID_CONFIG`、`REGISTERED_NOT_EXECUTED` 或 `UNVERIFIED` 标签，并提供原始 manifest 的下载链接。
+每个转折卡片要显示 `INVALID_CONFIG`、`REGISTERED_NOT_EXECUTED` 或 `UNVERIFIED` 标签，并提供原始 manifest 的下载链接。
 
 ## 11. 页面技术实现
 
