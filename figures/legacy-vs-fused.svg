@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 420" role="img">
+<style>text{font-family:"Songti SC","STSong","SimSun",serif} .axis{stroke:#6d6962;stroke-width:1} .grid{stroke:#e6dfd4;stroke-width:1} .label{fill:#4b4742;font-size:14px} .small{fill:#766f66;font-size:12px} .title{fill:#292621;font-size:22px;font-weight:600} </style>
+<text class="title" x="70" y="42">Legacy versus fused execution graph</text>
+<text class="label" x="70" y="138">legacy</text>
+<rect x="235" y="100" width="120" height="60" rx="10" fill="#a76c4f" opacity=".9"/><text x="295" y="136" text-anchor="middle" fill="white" font-size="15">encoder pass</text>
+<rect x="405" y="100" width="120" height="60" rx="10" fill="#a76c4f" opacity=".9"/><text x="465" y="136" text-anchor="middle" fill="white" font-size="15">encoder pass</text>
+<rect x="575" y="100" width="120" height="60" rx="10" fill="#a76c4f" opacity=".9"/><text x="635" y="136" text-anchor="middle" fill="white" font-size="15">encoder pass</text>
+<path d="M365 130 H395 M535 130 H565" stroke="#776e65" stroke-width="2" marker-end="url(#a)"/>
+<text class="label" x="70" y="298">fused</text>
+<rect x="235" y="260" width="120" height="60" rx="10" fill="#3d8967" opacity=".9"/><text x="295" y="296" text-anchor="middle" fill="white" font-size="15">encoder pass</text>
+<defs><marker id="a" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#776e65"/></marker></defs>
+<text class="small" x="70" y="382">real-checkpoint action/counter identity · state max |Δ| = 4.158×10⁻⁶ · tolerance = 10⁻⁵</text>
+</svg>
